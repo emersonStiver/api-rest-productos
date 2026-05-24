@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Infraestructura CI/CD para API REST - Taller AWS
+  Crea: Elastic Beanstalk App + Environment + IAM Roles
+
+Parameters:
+  AppName:
+    Type: String
+    Default: api-rest-productos
+    Description: Nombre de la aplicación
+
+  EnvironmentName:
+    Type: String
+    Default: api-rest-productos-env
+    Description: Nombre del entorno de Elastic Beanstalk
+
+Resources:
+
+  # IAM Role para la instancia EC2 de Elastic Beanstalk
+  EBInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-eb-instance-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker
+
+  EBInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "${AppName}-instance-profile"
+      Roles:
+        - !Ref EBInstanceRole
+
+  # Aplicación Elastic Beanstalk
+  ElasticBeanstalkApp:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: !Ref AppName
+      Description: API REST de Productos desplegada con CI/CD Pipeline
+
+  # Entorno Elastic Beanstalk
+  ElasticBeanstalkEnv:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: !Ref ElasticBeanstalkApp
+      EnvironmentName: !Ref EnvironmentName
+      SolutionStackName: "64bit Amazon Linux 2023 v6.1.0 running Node.js 18"
+      OptionSettings:
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value: !Ref EBInstanceProfile
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: EnvironmentType
+          Value: SingleInstance
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: PORT
+          Value: "8080"
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: NODE_ENV
+          Value: production
+
+Outputs:
+  ApplicationURL:
+    Description: URL del entorno de Elastic Beanstalk
+    Value: !Sub "http://${ElasticBeanstalkEnv.EndpointURL}"
+    Export:
+      Name: !Sub "${AppName}-URL"
+
+  ApplicationName:
+    Value: !Ref AppName
+    Export:
+      Name: !Sub "${AppName}-Name"

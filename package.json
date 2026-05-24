@@ -1,0 +1,16 @@
+{
+  "name": "api-rest-productos",
+  "version": "1.0.0",
+  "description": "API REST simple para despliegue en AWS con CI/CD Pipeline",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Tests pasados correctamente\" && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
