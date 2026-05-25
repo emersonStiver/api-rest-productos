@@ -22,6 +22,16 @@ app.get('/api/productos', (req, res) => {
   res.json({ success: true, data: productos, total: productos.length });
 });
 
+// Deployment / Pipeline Verification check (Readiness probe)
+app.get('/ready', (req, res) => {
+  res.json({
+    status: 'READY',
+    deployment: 'SUCCESSFUL',
+    message: 'The new deployment is working just fine through the pipeline.',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // GET product by ID
 app.get('/api/productos/:id', (req, res) => {
   const producto = productos.find(p => p.id === parseInt(req.params.id));
