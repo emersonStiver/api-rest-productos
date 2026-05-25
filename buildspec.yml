@@ -1,5 +1,4 @@
 version: 0.2
-
 phases:
   install:
     commands:
@@ -7,9 +6,3 @@ phases:
   build:
     commands:
       - npm test
-      - echo "Build exitoso"
-
-artifacts:
-  files:
-    - "**/*"
-  discard-paths: no
